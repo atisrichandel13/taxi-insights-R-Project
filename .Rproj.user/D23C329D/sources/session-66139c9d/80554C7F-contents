@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Taxi Big Data Analytics</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; text-align: center; padding: 50px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        h1 { color: #333; }
+        button { background: #fec007; color: #000; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; }
+        button:hover { background: #e0a800; }
+        #result { margin-top: 20px; text-align: left; background: #222; color: #0f0; padding: 15px; border-radius: 5px; font-family: monospace; display: none; }
+        .stat-box { display: flex; justify-content: space-around; margin-top: 20px; }
+        .stat { text-align: center; }
+        .stat h3 { margin: 0; color: #555; font-size: 14px; }
+        .stat p { font-size: 24px; font-weight: bold; color: #333; margin: 5px 0 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🚕 NYC Taxi Analytics</h1>
+        <p>Powered by R + DuckDB (3 Million Rows)</p>
+        
+        <div style="margin: 20px 0;">
+            <label>Filter by Passenger Count:</label>
+            <select id="p_count">
+                <option value="1">1 Passenger</option>
+                <option value="2">2 Passengers</option>
+                <option value="4">4 Passengers (Minivan)</option>
+            </select>
+        </div>
+
+        <button onclick="fetchStats()">Analyze Data</button>
+
+        <div id="result">Waiting for data...</div>
+    </div>
+
+    <script>
+        async function fetchStats() {
+            const count = document.getElementById('p_count').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = "⏳ Crunching 3 million rows...";
+
+            try {
+                // Call the R API
+                const response = await fetch(`./stats/fare?count=${count}`);
+                const data = await response.json();
+                
+                // Format the JSON nicely
+                const formatted = JSON.stringify(data[0], null, 2); 
+                resultDiv.innerHTML = `<pre>${formatted}</pre>`;
+            } catch (err) {
+                resultDiv.innerHTML = "Error connecting to R API.";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>

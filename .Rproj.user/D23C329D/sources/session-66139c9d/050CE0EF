@@ -1,0 +1,27 @@
+{
+    "id": "050CE0EF",
+    "path": "/Users/atisrichandel/Desktop/Rproject/Dockerfile",
+    "project_path": "Dockerfile",
+    "type": "dockerfile",
+    "hash": "2954582071",
+    "contents": "",
+    "dirty": false,
+    "created": 1768332309298.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "19,23",
+        "scrollLine": "5"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1768332952,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1768332952293,
+    "read_only": false,
+    "read_only_alternatives": []
+}

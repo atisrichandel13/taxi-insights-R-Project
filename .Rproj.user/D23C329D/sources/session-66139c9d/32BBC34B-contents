@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Taxi Analytics Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --accent-purple: #c084fc;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        /* HEADER */
+        header {
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { margin: 0; font-weight: 800; font-size: 28px; letter-spacing: -1px; }
+        .subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 5px; }
+        .tag { background: #334155; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h2 { margin: 0; font-size: 18px; font-weight: 600; color: var(--text-primary); }
+
+        /* CONTROLS */
+        select {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: var(--accent-blue);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        button.secondary { background: var(--card-bg); border: 1px solid var(--accent-purple); color: var(--accent-purple); }
+        button.secondary:hover { background: var(--accent-purple); color: white; }
+
+        /* METRIC GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .kpi-box {
+            background: rgba(255,255,255,0.03);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .kpi-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 24px; font-weight: 800; margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+        .blue { color: var(--accent-blue); }
+        .green { color: var(--accent-green); }
+        .purple { color: var(--accent-purple); }
+
+        /* TERMINAL OUTPUT */
+        .model-output {
+            background: #000;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--accent-green);
+            line-height: 1.6;
+            border-left: 4px solid var(--accent-green);
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Loading Animation */
+        .loader { font-size: 12px; color: var(--text-secondary); display: none; margin-left: 10px;}
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        
+        <header>
+            <div>
+                <h1>NYC Taxi Analytics Engine</h1>
+                <div class="subtitle">Real-time processing of 3 Million+ Records</div>
+            </div>
+            <div>
+                <span class="tag">DuckDB</span>
+                <span class="tag">R Plumber</span>
+                <span class="tag">Docker</span>
+            </div>
+        </header>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>📊 Historical Aggregation</h2>
+                <div>
+                    <select id="p_count">
+                        <option value="1">1 Passenger</option>
+                        <option value="2">2 Passengers</option>
+                        <option value="3">3 Passengers</option>
+                        <option value="4">4 Passengers</option>
+                    </select>
+                    <button onclick="fetchStats()">Run Query</button>
+                    <span id="loader-1" class="loader">Processing...</span>
+                </div>
+            </div>
+
+            <div class="kpi-grid" id="stats-container" style="opacity: 0.3;">
+                <div class="kpi-box">
+                    <div class="kpi-label">Total Trips Analyzed</div>
+                    <div class="kpi-value blue" id="val-trips">-</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">Average Fare</div>
+                    <div class="kpi-value green" id="val-fare">-</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">Average Tip</div>
+                    <div class="kpi-value purple" id="val-tip">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>🧠 Linear Regression Model</h2>
+                <button class="secondary" onclick="runModel()">Train Model (Sampled)</button>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 14px;">
+                Trains a linear model (<code>Tip ~ Distance</code>) on a live sample to determine price elasticity.
+            </p>
+            
+            <span id="loader-2" class="loader">Training Model...</span>
+            <div id="model-result" class="model-output"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // Formatter for Currency
+        const fmtMoney = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        const fmtNum = new Intl.NumberFormat('en-US');
+
+        async function fetchStats() {
+            const count = document.getElementById('p_count').value;
+            document.getElementById('loader-1').style.display = 'inline';
+            document.getElementById('stats-container').style.opacity = '0.5';
+
+            try {
+                const res = await fetch(`./stats/fare?count=${count}`);
+                const data = await res.json();
+                const rec = data[0]; // Get first record
+
+                // Update UI with nice animations
+                document.getElementById('val-trips').innerText = fmtNum.format(rec.total_trips);
+                document.getElementById('val-fare').innerText = fmtMoney.format(rec.avg_fare);
+                document.getElementById('val-tip').innerText = fmtMoney.format(rec.avg_tip);
+                
+                document.getElementById('stats-container').style.opacity = '1';
+            } catch (err) {
+                console.error(err);
+                alert("API Error");
+            } finally {
+                document.getElementById('loader-1').style.display = 'none';
+            }
+        }
+
+        async function runModel() {
+            const out = document.getElementById('model-result');
+            const loader = document.getElementById('loader-2');
+            
+            loader.style.display = 'inline-block';
+            out.style.display = 'none';
+
+            try {
+                const res = await fetch(`./stats/model`);
+                const data = await res.json();
+
+                // Format the math equation
+                const sign = data.intercept >= 0 ? '+' : '-';
+                const equation = `y = ${data.slope}x ${sign} ${Math.abs(data.intercept)}`;
+
+                out.innerHTML = `
+> TRAINING COMPLETED SUCCESSFULLY
+> -------------------------------
+> FORMULA:   ${equation}
+> R-SQUARED: ${data.r_squared}
+>
+> INSIGHT:   ${data.message}
+                `.trim();
+                
+                out.style.display = 'block';
+            } catch (err) {
+                console.error(err);
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
