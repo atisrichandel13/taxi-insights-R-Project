@@ -1,2 +1,92 @@
-# taxi-insights-R-Project
-A high-performance **R microservice** capable of performing statistical aggregation and linear modeling on **3 Million+ records** in milliseconds.  This project demonstrates how to bridge the gap between **Data Science** (R/Linear Models) and **Data Engineering** (DuckDB/Parquet) by building a containerized API that runs efficiently on limited RAM.
+# 🚕 NYC Taxi Big Data Analytics API
+
+![Status](https://img.shields.io/badge/Status-Deployed-success)
+![Tech](https://img.shields.io/badge/R-Plumber-blue)
+![Database](https://img.shields.io/badge/DB-DuckDB-yellow)
+![Container](https://img.shields.io/badge/Docker-Microservice-2496ED)
+
+A high-performance **R microservice** capable of performing statistical aggregation and linear modeling on **3 Million+ records** in milliseconds.
+
+This project demonstrates how to bridge the gap between **Data Science** (R/Linear Models) and **Data Engineering** (DuckDB/Parquet) by building a containerized API that runs efficiently on limited RAM.
+
+### 🔗 [Live Demo](https://nyc-taxi-analytics.onrender.com)
+> **⚠️ Note:** The demo is hosted on a free-tier serverless instance. Please allow **45-60 seconds** for the container to "cold start" upon the first request.
+
+---
+
+## 🏗 Architecture
+Instead of loading the entire dataset into R's memory (which would crash a standard container), this architecture delegates computation to an embedded OLAP engine.
+
+`[Client UI] <--> [R Plumber API] <--> [DuckDB Engine] <== (Zero-Copy Read) ==> [Parquet File]`
+
+* **Data Source:** NYC Taxi Yellow Trip Records (~3,000,000 rows).
+* **Storage:** Parquet (Columnar compression).
+* **Compute:** DuckDB (In-process SQL OLAP).
+* **API Layer:** R Plumber.
+* **Deployment:** Docker / Render.
+
+---
+
+## 🚀 Key Features
+
+### 1. 📊 Real-Time Aggregation (Descriptive Analytics)
+* **Goal:** Calculate historical averages (Fare, Tip) instantly.
+* **Tech:** Uses DuckDB's vectorized engine to group and summarize millions of rows in **< 100ms**.
+* **Preprocessing:** Handles missing values (`NA`) on-the-fly during query execution.
+
+### 2. 🧠 Linear Regression (Predictive Analytics)
+* **Goal:** Determine the price elasticity of tipping behavior.
+* **Tech:** Trains an R `lm()` model on a live random sample of the data.
+* **Insight:** Calculates the exact "Cost per Mile" slope ($m$) to reveal tipping trends.
+* **Preprocessing:** Automatically filters out Cash rides (unrecorded tips) and GPS outliers to ensure model accuracy.
+
+---
+
+## 🛠 API Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Returns the Analytics Dashboard (HTML/CSS). |
+| `GET` | `/stats/fare?count=N` | Returns avg fare/tip for trips with `N` passengers. |
+| `GET` | `/stats/model` | Trains a Linear Regression model on a 1% sample and returns coefficients. |
+
+---
+
+## 💻 Local Installation
+
+To run this project on your local machine using Docker:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/YOUR_USERNAME/nyc-taxi-r-api.git](https://github.com/YOUR_USERNAME/nyc-taxi-r-api.git)
+    cd nyc-taxi-r-api
+    ```
+
+2.  **Download Data:**
+    Ensure `taxi.parquet` is present in the `data/` folder.
+    *(Note: The live repo contains a trimmed version for GitHub limits, pull full data from NYC TLC if needed).*
+
+3.  **Build the Container:**
+    ```bash
+    docker build -t r-taxi .
+    ```
+
+4.  **Run the App:**
+    ```bash
+    docker run -p 8000:8000 r-taxi
+    ```
+    Visit `http://localhost:8000` in your browser.
+
+---
+
+## 🧠 Engineering Decision: Why DuckDB + R?
+Standard R workflows (`read.csv`) load data into RAM. For a dataset of 3 million rows, this is inefficient and non-scalable for cloud microservices.
+
+By using **DuckDB**, we achieve:
+1.  **Lazy Evaluation:** Data is only scanned when a result is explicitly collected.
+2.  **Columnar Efficiency:** We only read the columns we need (e.g., `tip_amount`), ignoring the rest.
+3.  **Best of Both Worlds:** We get the **speed of SQL** for aggregation and the **statistical power of R** for modeling.
+
+---
+## Data Source
+The data is provided by the NYC Taxi & Limousine Commission.
