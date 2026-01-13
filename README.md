@@ -9,7 +9,7 @@ A high-performance **R microservice** capable of performing statistical aggregat
 
 This project demonstrates how to bridge the gap between **Data Science** (R/Linear Models) and **Data Engineering** (DuckDB/Parquet) by building a containerized API that runs efficiently on limited RAM.
 
-### 🔗 [Live Demo](https://nyc-taxi-analytics.onrender.com)
+### 🔗 [Live Demo](https://taxi-insights-r-project.onrender.com/)
 > **⚠️ Note:** The demo is hosted on a free-tier serverless instance. Please allow **45-60 seconds** for the container to "cold start" upon the first request.
 
 ---
